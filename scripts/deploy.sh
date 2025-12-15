@@ -164,6 +164,12 @@ $COMPOSER_CMD install --no-dev --optimize-autoloader --no-interaction || {
     printf "${RED}Error: Composer install failed!${NC}\n"
     exit 1
 }
+
+# Ensure autoloader is up to date (important for packages like EasyPost)
+printf "Regenerating Composer autoloader...\n"
+$COMPOSER_CMD dump-autoload --optimize --no-interaction || {
+    printf "${YELLOW}Warning: Autoloader regeneration failed, continuing...${NC}\n"
+}
 echo ""
 
 # Step 3: Run database migrations
@@ -260,6 +266,12 @@ echo ""
 
 # Step 7: Final optimizations
 printf "${GREEN}[7/7] Running final optimizations...${NC}\n"
+
+# Clear and rebuild autoloader cache
+$COMPOSER_CMD dump-autoload --optimize --no-interaction || {
+    printf "${YELLOW}Warning: Autoloader dump failed. Continuing...${NC}\n"
+}
+
 $PHP_CMD artisan optimize || {
     printf "${YELLOW}Warning: Optimize failed. Continuing...${NC}\n"
 }
