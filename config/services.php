@@ -41,4 +41,8 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'easypost' => [
+        'api_key' => env('EASYPOST_API_KEY'),
+    ],
+
 ];

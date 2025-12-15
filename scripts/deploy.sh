@@ -198,7 +198,7 @@ $COMPOSER_CMD install --no-dev --optimize-autoloader --no-interaction || {
 # Restore composer.lock again after install (in case composer modified it)
 # This ensures composer.lock stays in sync with the repository
 if git diff --quiet composer.lock 2>/dev/null; then
-    printf "composer.lock is unchanged.${NC}\n"
+    printf "composer.lock is unchanged.\n"
 else
     printf "${YELLOW}composer.lock was modified by composer install. Restoring from repository...${NC}\n"
     git checkout HEAD -- composer.lock 2>/dev/null || true
