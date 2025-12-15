@@ -209,35 +209,41 @@ if [ "$SKIP_FRONTEND" = false ]; then
         }
     fi
     
-    # ALWAYS fix permissions for node_modules/.bin executables (critical for vite and other tools)
-    if [ -d "node_modules/.bin" ]; then
-        printf "Fixing permissions for node_modules/.bin executables...\n"
-        find node_modules/.bin -type f -exec chmod +x {} \; 2>/dev/null || {
-            # If find fails, try chmod directly
-            chmod +x node_modules/.bin/* 2>/dev/null || true
-        }
+    # ALWAYS fix permissions for ALL executables in node_modules
+    # This includes node_modules/.bin AND packages like @esbuild/*/bin/esbuild
+    if [ -d "node_modules" ]; then
+        printf "Fixing permissions for node_modules executables...\n"
+        # Fix node_modules/.bin executables
+        if [ -d "node_modules/.bin" ]; then
+            find node_modules/.bin -type f -exec chmod +x {} \; 2>/dev/null || true
+        fi
+        # Fix executables in package bin directories (e.g., @esbuild/freebsd-x64/bin/esbuild)
+        find node_modules -type f -path "*/bin/*" -exec chmod +x {} \; 2>/dev/null || true
+        # Also check for common executable patterns
+        find node_modules -type f \( -name "esbuild" -o -name "vite" -o -name "node" \) -exec chmod +x {} \; 2>/dev/null || true
         printf "Permissions fixed.\n"
     else
-        printf "${YELLOW}Warning: node_modules/.bin directory not found!${NC}\n"
+        printf "${YELLOW}Warning: node_modules directory not found!${NC}\n"
     fi
     
     # Build production assets
     printf "Building frontend assets...\n"
     $NPM_CMD run build || {
-        printf "${RED}Error: Frontend build failed!${NC}\n"
-        printf "${YELLOW}Checking vite permissions...${NC}\n"
-        if [ -f "node_modules/.bin/vite" ]; then
-            ls -l node_modules/.bin/vite
-            chmod +x node_modules/.bin/vite
-            printf "Trying build again...\n"
-            $NPM_CMD run build || {
-                printf "${RED}Error: Frontend build failed after permission fix!${NC}\n"
-                exit 1
-            }
-        else
-            printf "${RED}vite executable not found in node_modules/.bin/${NC}\n"
+        printf "${YELLOW}Build failed, fixing all executable permissions and retrying...${NC}\n"
+        # Fix all executables more aggressively
+        find node_modules -type f -path "*/bin/*" -exec chmod +x {} \; 2>/dev/null || true
+        find node_modules/.bin -type f -exec chmod +x {} \; 2>/dev/null || true
+        find node_modules/@esbuild -type f -name "esbuild" -exec chmod +x {} \; 2>/dev/null || true
+        
+        printf "Retrying build...\n"
+        $NPM_CMD run build || {
+            printf "${RED}Error: Frontend build failed after permission fixes!${NC}\n"
+            printf "${YELLOW}Please check:${NC}\n"
+            printf "  1. node_modules/.bin/vite permissions\n"
+            printf "  2. node_modules/@esbuild/*/bin/esbuild permissions\n"
+            printf "  3. Run: find node_modules -type f -executable -ls${NC}\n"
             exit 1
-        fi
+        }
     }
     echo ""
 else

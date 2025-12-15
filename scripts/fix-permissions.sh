@@ -90,10 +90,17 @@ if [ -d "scripts" ]; then
     echo "  Set script files to 755"
 fi
 
-# Fix permissions for node_modules/.bin executables (needed for vite, npm scripts, etc.)
-if [ -d "node_modules/.bin" ]; then
-    find node_modules/.bin -type f -exec chmod 755 {} \;
-    echo "  Set node_modules/.bin executables to 755"
+# Fix permissions for ALL executables in node_modules
+# This includes node_modules/.bin AND packages like @esbuild/*/bin/esbuild
+if [ -d "node_modules" ]; then
+    # Fix node_modules/.bin executables
+    if [ -d "node_modules/.bin" ]; then
+        find node_modules/.bin -type f -exec chmod 755 {} \;
+        echo "  Set node_modules/.bin executables to 755"
+    fi
+    # Fix executables in package bin directories (e.g., @esbuild/freebsd-x64/bin/esbuild)
+    find node_modules -type f -path "*/bin/*" -exec chmod 755 {} \; 2>/dev/null || true
+    echo "  Set node_modules package bin executables to 755"
 fi
 
 # Ensure .env is readable by owner and group (640)
