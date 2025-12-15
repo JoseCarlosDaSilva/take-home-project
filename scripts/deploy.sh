@@ -197,15 +197,16 @@ if [ ! -d "vendor/easypost" ]; then
 fi
 
 # Ensure autoloader is up to date (important for packages like EasyPost)
+# Suppress warnings about missing dev package directories (normal with --no-dev)
 printf "Regenerating Composer autoloader...\n"
-$COMPOSER_CMD dump-autoload --optimize --no-interaction || {
-    printf "${YELLOW}Warning: Autoloader regeneration failed, continuing...${NC}\n"
+$COMPOSER_CMD dump-autoload --optimize --no-interaction 2>&1 | grep -v "Could not scan for classes inside" | grep -v "which does not appear to be a file nor a folder" || {
+    printf "${YELLOW}Warning: Autoloader regeneration had some warnings (normal with --no-dev), continuing...${NC}\n"
 }
 
 # Verify autoloader includes EasyPost
 if ! grep -q "EasyPost" vendor/composer/autoload_psr4.php 2>/dev/null && ! grep -q "easypost" vendor/composer/autoload_classmap.php 2>/dev/null; then
     printf "${YELLOW}Warning: EasyPost not found in autoloader, forcing regeneration...${NC}\n"
-    $COMPOSER_CMD dump-autoload --no-interaction || true
+    $COMPOSER_CMD dump-autoload --no-interaction 2>&1 | grep -v "Could not scan for classes inside" | grep -v "which does not appear to be a file nor a folder" || true
 fi
 echo ""
 
@@ -325,8 +326,9 @@ echo ""
 printf "${GREEN}[7/7] Running final optimizations...${NC}\n"
 
 # Clear and rebuild autoloader cache
-$COMPOSER_CMD dump-autoload --optimize --no-interaction || {
-    printf "${YELLOW}Warning: Autoloader dump failed. Continuing...${NC}\n"
+# Suppress warnings about missing dev package directories (normal with --no-dev)
+$COMPOSER_CMD dump-autoload --optimize --no-interaction 2>&1 | grep -v "Could not scan for classes inside" | grep -v "which does not appear to be a file nor a folder" || {
+    printf "${YELLOW}Warning: Autoloader dump had some warnings (normal with --no-dev). Continuing...${NC}\n"
 }
 
 $PHP_CMD artisan optimize || {
