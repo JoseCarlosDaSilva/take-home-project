@@ -11,9 +11,10 @@ class EasyPostService
 
     public function __construct()
     {
-        $apiKey = env('EASYPOST_API_KEY');
+        // Use config() instead of env() to work with cached configuration in production
+        $apiKey = config('services.easypost.api_key');
         if (empty($apiKey)) {
-            throw new \Exception('EASYPOST_API_KEY is not configured in .env file');
+            throw new \Exception('EASYPOST_API_KEY is not configured. Please set it in .env file and run: php artisan config:cache');
         }
         $this->client = new EasyPostClient($apiKey);
     }
