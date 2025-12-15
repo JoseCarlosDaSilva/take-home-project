@@ -34,13 +34,24 @@ CURRENT_HOME=$(eval echo ~$CURRENT_USER)
 export HOME="$CURRENT_HOME"
 
 # Force git to use the current user's SSH config
-export GIT_SSH_COMMAND="ssh -i $CURRENT_HOME/.ssh/github_takehome_project -F $CURRENT_HOME/.ssh/config"
+# Get current user and home directory (important for setuidgid scenarios)
+CURRENT_USER=$(whoami)
+CURRENT_HOME=$(getent passwd "$CURRENT_USER" 2>/dev/null | cut -d: -f6)
+
+# If getent fails, try eval as fallback
+if [ -z "$CURRENT_HOME" ] || [ ! -d "$CURRENT_HOME" ]; then
+    CURRENT_HOME=$(eval echo ~"$CURRENT_USER")
+fi
+
+# Force HOME to current user's home (prevents using root's config when using setuidgid)
+export HOME="$CURRENT_HOME"
 
 echo "========================================="
 echo "Laravel Deployment Script"
 echo "========================================="
 echo "Working directory: $SCRIPT_DIR"
-echo "User: $(whoami)"
+echo "User: $CURRENT_USER"
+echo "Home: $CURRENT_HOME"
 echo ""
 
 # Check if .env exists
