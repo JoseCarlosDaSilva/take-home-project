@@ -6,11 +6,20 @@
 
 set -e  # Exit on error
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+# Detect if colors are supported (check if output is a terminal)
+if [ -t 1 ] && command -v tput >/dev/null 2>&1 && [ "$(tput colors)" -ge 8 ]; then
+    # Colors are supported
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    YELLOW='\033[1;33m'
+    NC='\033[0m' # No Color
+else
+    # Colors not supported, use empty strings
+    RED=''
+    GREEN=''
+    YELLOW=''
+    NC=''
+fi
 
 # Get the script directory (project root)
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
