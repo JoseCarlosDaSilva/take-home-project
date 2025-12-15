@@ -207,21 +207,37 @@ if [ "$SKIP_FRONTEND" = false ]; then
                 exit 1
             }
         }
-        # Fix permissions for node_modules/.bin executables after install
-        if [ -d "node_modules/.bin" ]; then
-            chmod -R u+x node_modules/.bin/* 2>/dev/null || true
-        fi
     fi
     
-    # Ensure node_modules/.bin executables have correct permissions before build
+    # ALWAYS fix permissions for node_modules/.bin executables (critical for vite and other tools)
     if [ -d "node_modules/.bin" ]; then
-        chmod -R u+x node_modules/.bin/* 2>/dev/null || true
+        printf "Fixing permissions for node_modules/.bin executables...\n"
+        find node_modules/.bin -type f -exec chmod +x {} \; 2>/dev/null || {
+            # If find fails, try chmod directly
+            chmod +x node_modules/.bin/* 2>/dev/null || true
+        }
+        printf "Permissions fixed.\n"
+    else
+        printf "${YELLOW}Warning: node_modules/.bin directory not found!${NC}\n"
     fi
     
     # Build production assets
+    printf "Building frontend assets...\n"
     $NPM_CMD run build || {
         printf "${RED}Error: Frontend build failed!${NC}\n"
-        exit 1
+        printf "${YELLOW}Checking vite permissions...${NC}\n"
+        if [ -f "node_modules/.bin/vite" ]; then
+            ls -l node_modules/.bin/vite
+            chmod +x node_modules/.bin/vite
+            printf "Trying build again...\n"
+            $NPM_CMD run build || {
+                printf "${RED}Error: Frontend build failed after permission fix!${NC}\n"
+                exit 1
+            }
+        else
+            printf "${RED}vite executable not found in node_modules/.bin/${NC}\n"
+            exit 1
+        fi
     }
     echo ""
 else
