@@ -332,9 +332,23 @@ $PHP_CMD artisan cache:clear 2>/dev/null || true
 $PHP_CMD artisan route:clear 2>/dev/null || true
 $PHP_CMD artisan view:clear 2>/dev/null || true
 
-# Clear opcache if available (important for production)
+# CRITICAL: Clear opcache aggressively (required for EasyPost class changes)
+printf "Clearing PHP opcache...\n"
 if php -m | grep -q opcache 2>/dev/null; then
+    # Try artisan command first
     $PHP_CMD artisan opcache:clear 2>/dev/null || true
+    
+    # Also try direct opcache_reset via PHP script
+    php -r "if (function_exists('opcache_reset')) { opcache_reset(); echo 'Opcache cleared via opcache_reset()\n'; }" 2>/dev/null || true
+    
+    # Try restarting PHP-FPM (if available and script has permission)
+    if command -v service >/dev/null 2>&1 && [ -w /var/run/php82-fpm.pid ] 2>/dev/null; then
+        printf "Attempting PHP-FPM reload to clear opcache...\n"
+        service php82-fpm reload 2>/dev/null || true
+    elif [ -f /usr/local/etc/rc.d/php-fpm ] 2>/dev/null; then
+        # FreeBSD service management
+        /usr/local/etc/rc.d/php-fpm reload 2>/dev/null || true
+    fi
 fi
 
 # Clear and rebuild autoloader cache
