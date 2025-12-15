@@ -124,6 +124,8 @@ npm run dev
 
 ### Deployment Scripts
 
+**Important Note**: The deployment scripts have been optimized for **FreeBSD** systems using **Apache 2.4** with **PHP-FPM**. They may require adjustments for other operating systems (Linux, macOS, etc.) or different web servers (Nginx, etc.).
+
 The project includes two deployment scripts for production:
 
 1. **`scripts/deploy.sh`** - Handles the full deployment process:
