@@ -168,7 +168,7 @@ $COMPOSER_CMD install --no-dev --optimize-autoloader --no-interaction || {
 # Verify EasyPost package is installed (critical dependency)
 if [ ! -d "vendor/easypost" ]; then
     printf "${YELLOW}Warning: EasyPost package not found, attempting to install...${NC}\n"
-    $COMPOSER_CMD require easypost/easypost-php --no-dev --optimize-autoloader --no-interaction || {
+    $COMPOSER_CMD require easypost/easypost-php --optimize-autoloader --no-interaction || {
         printf "${RED}Error: Failed to install EasyPost package!${NC}\n"
         exit 1
     }
