@@ -145,11 +145,11 @@ The project includes two deployment scripts for production:
 **Important**: Run scripts in the correct order:
 
 ```bash
-# 1. First, run the deployment script (includes git pull)
+# 1. First, run the deployment script as site owner (takehome) - NO ROOT NEEDED
 ./scripts/deploy.sh
 
-# 2. Then, fix permissions for all files/directories
-./scripts/fix-permissions.sh
+# 2. Then, fix permissions with sudo (requires root privileges for chown)
+sudo ./scripts/fix-permissions.sh
 ```
 
 **Why this order?**
@@ -157,7 +157,15 @@ The project includes two deployment scripts for production:
 - Running `fix-permissions.sh` AFTER ensures all newly created files have correct permissions
 - The `deploy.sh` already includes `git pull` as the first step, so no need to run it separately
 
-**Note**: Both scripts should be run from the project root directory by the site owner user (`takehome` on FreeBSD).
+**User permissions:**
+- **`deploy.sh`**: Run as site owner (`takehome`) - **NO ROOT NEEDED**
+  - This script does `git pull`, `composer install`, `npm install/build`, and `artisan` commands
+  - All these operations work fine as the site owner user
+- **`fix-permissions.sh`**: Run with `sudo` - **REQUIRES ROOT PRIVILEGES**
+  - This script uses `chown` to change ownership to `www:takehome` for writable directories
+  - Changing ownership to another user (`www`) requires root privileges
+
+**Note**: Both scripts should be run from the project root directory.
 
 ## Configuration
 
