@@ -22,8 +22,8 @@ cd "$SCRIPT_DIR" || exit 1
 echo "Working directory: $SCRIPT_DIR"
 echo ""
 
-# Set ownership for all project files to site owner (except writable dirs)
-echo "Setting ownership of all files to $SITE_OWNER..."
+# Set ownership for all project files to site owner (will adjust writable dirs later)
+echo "Setting ownership of all files to $SITE_OWNER:$SITE_OWNER..."
 chown -R "$SITE_OWNER:$SITE_OWNER" .
 
 # Directories that need to be writable by Apache
@@ -45,45 +45,33 @@ echo "Setting ownership of writable directories to $APACHE_USER:$SITE_OWNER..."
 chown -R "$APACHE_USER:$SITE_OWNER" storage
 chown -R "$APACHE_USER:$SITE_OWNER" bootstrap/cache
 
-# Set directory permissions (755 for most directories)
+# Set permissions for regular directories and files (excluding writable dirs)
 echo ""
-echo "Setting directory permissions (755)..."
-find . -type d -exec chmod 755 {} \;
-
-# Set file permissions (644 for most files)
-echo "Setting file permissions (644)..."
-find . -type f -exec chmod 644 {} \;
+echo "Setting permissions for regular files and directories..."
+find . -type d ! -path "./storage/*" ! -path "./bootstrap/cache/*" -exec chmod 755 {} \;
+find . -type f ! -path "./storage/*" ! -path "./bootstrap/cache/*" -exec chmod 644 {} \;
 
 # Set special permissions for storage and cache directories
 echo ""
 echo "Setting special permissions for writable directories..."
 
 # Storage directories: 775 (rwxrwxr-x) - owner (www) and group (takehome) can write
+# Files: 664 (rw-rw-r--) - owner (www) and group (takehome) can write
 for dir in $STORAGE_DIRS; do
     if [ -d "$dir" ]; then
-        chmod 775 "$dir"
-        # Set all files in these directories to 664 (rw-rw-r--)
-        find "$dir" -type f -exec chmod 664 {} \;
-        # Set all subdirectories to 775
+        # Set directory permissions to 775
         find "$dir" -type d -exec chmod 775 {} \;
-        echo "  Set $dir to 775 (directories) and 664 (files)"
+        # Set file permissions to 664
+        find "$dir" -type f -exec chmod 664 {} \;
+        echo "  Set $dir: directories to 775, files to 664"
     fi
 done
 
-# Bootstrap cache: 775
+# Bootstrap cache: 775 for dirs, 664 for files
 if [ -d "bootstrap/cache" ]; then
-    chmod 775 bootstrap/cache
-    find bootstrap/cache -type f -exec chmod 664 {} \;
     find bootstrap/cache -type d -exec chmod 775 {} \;
-    echo "  Set bootstrap/cache to 775 (directories) and 664 (files)"
-fi
-
-# Make storage/app/public accessible
-if [ -d "storage/app/public" ]; then
-    chmod 775 storage/app/public
-    find storage/app/public -type f -exec chmod 664 {} \;
-    find storage/app/public -type d -exec chmod 775 {} \;
-    echo "  Set storage/app/public to 775 (directories) and 664 (files)"
+    find bootstrap/cache -type f -exec chmod 664 {} \;
+    echo "  Set bootstrap/cache: directories to 775, files to 664"
 fi
 
 # Set permissions for artisan and scripts (executable)
@@ -111,23 +99,21 @@ fi
 
 # Set permissions for public directory
 if [ -d "public" ]; then
-    chmod 755 public
-    find public -type f -exec chmod 644 {} \;
     find public -type d -exec chmod 755 {} \;
-    echo "  Set public directory permissions"
+    find public -type f -exec chmod 644 {} \;
+    echo "  Set public directory: directories to 755, files to 644"
 fi
 
 echo ""
 echo "✓ Permissions setup complete!"
 echo ""
 echo "Summary:"
-echo "  - Most files/directories owned by: $SITE_OWNER:$SITE_OWNER (755/644)"
+echo "  - Regular files/directories: $SITE_OWNER:$SITE_OWNER (755/644)"
 echo "  - Writable directories (storage, bootstrap/cache): $APACHE_USER:$SITE_OWNER"
 echo "    - Directories: 775 (owner www and group takehome can write)"
 echo "    - Files: 664 (owner www and group takehome can write)"
-echo "  - Regular files: 644"
-echo "  - Regular directories: 755"
-echo "  - .env: 600 (secure, owned by $SITE_OWNER)"
+echo "  - Executable files (artisan, scripts): $SITE_OWNER:$SITE_OWNER (755)"
+echo "  - .env: $SITE_OWNER:$SITE_OWNER (600, secure)"
 echo ""
 echo "The Apache user '$APACHE_USER' (owner) can now write to logs and cache directories."
 echo "The site owner '$SITE_OWNER' (group) also has write access to these directories."
