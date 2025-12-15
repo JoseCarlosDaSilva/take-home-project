@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/local/bin/bash
 
 # Laravel Permissions Fix Script for FreeBSD Apache/PHP-FPM
 # This script sets correct ownership and permissions for Laravel directories

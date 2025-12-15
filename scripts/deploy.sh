@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/local/bin/bash
 
 # Laravel Deployment Script
 # This script should be run from the project root by the site owner (takehome)
