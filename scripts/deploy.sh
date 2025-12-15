@@ -28,19 +28,22 @@ cd "$SCRIPT_DIR" || exit 1
 # Ensure we use the current user's home directory for SSH/Git config
 # This is important when using setuidgid or similar tools
 CURRENT_USER=$(whoami)
-CURRENT_HOME=$(eval echo ~$CURRENT_USER)
+CURRENT_HOME=$(getent passwd "$CURRENT_USER" 2>/dev/null | cut -d: -f6)
 
-# Set HOME explicitly to avoid using root's home
+# If getent fails, try eval as fallback
+if [ -z "$CURRENT_HOME" ] || [ ! -d "$CURRENT_HOME" ]; then
+    CURRENT_HOME=$(eval echo ~"$CURRENT_USER")
+fi
+
+# Set HOME explicitly to avoid using root's home (critical for setuidgid)
 export HOME="$CURRENT_HOME"
-
-# Force git to use the current user's SSH config
-export GIT_SSH_COMMAND="ssh -i $CURRENT_HOME/.ssh/github_takehome_project -F $CURRENT_HOME/.ssh/config"
 
 echo "========================================="
 echo "Laravel Deployment Script"
 echo "========================================="
 echo "Working directory: $SCRIPT_DIR"
-echo "User: $(whoami)"
+echo "User: $CURRENT_USER"
+echo "Home: $CURRENT_HOME"
 echo ""
 
 # Check if .env exists
@@ -123,13 +126,20 @@ if [ -d ".git" ]; then
     # This is critical when using setuidgid - forces use of current user's SSH config
     if [ -f "$CURRENT_HOME/.ssh/config" ] && grep -q "github.com-takehome" "$CURRENT_HOME/.ssh/config" 2>/dev/null; then
         # Use SSH config (recommended approach with deploy key)
-        export GIT_SSH_COMMAND="ssh -F $CURRENT_HOME/.ssh/config -o UserKnownHostsFile=$CURRENT_HOME/.ssh/known_hosts"
-    elif [ -f "$CURRENT_HOME/.ssh/github_takehome_project" ]; then
-        # Fallback: use deploy key directly
-        export GIT_SSH_COMMAND="ssh -i $CURRENT_HOME/.ssh/github_takehome_project -o IdentitiesOnly=yes -o UserKnownHostsFile=$CURRENT_HOME/.ssh/known_hosts"
+        # The SSH config should define Host github.com-takehome with the correct IdentityFile
+        export GIT_SSH_COMMAND="ssh -F $CURRENT_HOME/.ssh/config"
+        
+        # Check if remote URL needs to be updated to use the SSH alias
+        CURRENT_REMOTE=$(git remote get-url origin 2>/dev/null || echo "")
+        if echo "$CURRENT_REMOTE" | grep -q "^git@github.com:" && ! echo "$CURRENT_REMOTE" | grep -q "github.com-takehome"; then
+            # Remote uses standard github.com, update to use alias
+            NEW_REMOTE=$(echo "$CURRENT_REMOTE" | sed 's|git@github.com:|git@github.com-takehome:|')
+            printf "${YELLOW}Updating git remote URL to use SSH alias...${NC}\n"
+            git remote set-url origin "$NEW_REMOTE" 2>/dev/null || true
+        fi
     else
-        # No specific SSH config, use default but force current user's home
-        export GIT_SSH_COMMAND="ssh -F $CURRENT_HOME/.ssh/config -o UserKnownHostsFile=$CURRENT_HOME/.ssh/known_hosts 2>/dev/null || ssh"
+        # No SSH config alias found, use default SSH config
+        export GIT_SSH_COMMAND="ssh -F $CURRENT_HOME/.ssh/config 2>/dev/null || ssh"
     fi
     
     # Try to pull, but continue if it fails (may not have SSH keys or remote access)
