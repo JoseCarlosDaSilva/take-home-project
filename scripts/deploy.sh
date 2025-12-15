@@ -34,7 +34,7 @@ echo ""
 
 # Check if .env exists
 if [ ! -f ".env" ]; then
-    echo "${RED}Error: .env file not found!${NC}"
+    printf "${RED}Error: .env file not found!${NC}\n"
     echo "Please create .env file from .env.sample before deploying."
     exit 1
 fi
@@ -45,15 +45,15 @@ if ! command -v composer &> /dev/null; then
     # Try common installation paths
     if [ -f "/usr/local/bin/composer" ]; then
         COMPOSER_CMD="/usr/local/bin/composer"
-        echo "${YELLOW}Found composer at: $COMPOSER_CMD${NC}"
+        printf "${YELLOW}Found composer at: $COMPOSER_CMD${NC}\n"
     elif [ -f "/usr/bin/composer" ]; then
         COMPOSER_CMD="/usr/bin/composer"
-        echo "${YELLOW}Found composer at: $COMPOSER_CMD${NC}"
+        printf "${YELLOW}Found composer at: $COMPOSER_CMD${NC}\n"
     elif [ -f "$HOME/.composer/vendor/bin/composer" ]; then
         COMPOSER_CMD="$HOME/.composer/vendor/bin/composer"
-        echo "${YELLOW}Found composer at: $COMPOSER_CMD${NC}"
+        printf "${YELLOW}Found composer at: $COMPOSER_CMD${NC}\n"
     else
-        echo "${RED}Error: Composer is not installed or not found${NC}"
+        printf "${RED}Error: Composer is not installed or not found${NC}\n"
         echo "Please install Composer or add it to PATH"
         exit 1
     fi
@@ -82,14 +82,14 @@ if ! command -v npm &> /dev/null; then
     # Try common installation paths
     if [ -f "/usr/local/bin/npm" ]; then
         NPM_CMD="/usr/local/bin/npm"
-        echo "${YELLOW}Found npm at: $NPM_CMD${NC}"
+        printf "${YELLOW}Found npm at: $NPM_CMD${NC}\n"
         SKIP_FRONTEND=false
     elif [ -f "/usr/bin/npm" ]; then
         NPM_CMD="/usr/bin/npm"
-        echo "${YELLOW}Found npm at: $NPM_CMD${NC}"
+        printf "${YELLOW}Found npm at: $NPM_CMD${NC}\n"
         SKIP_FRONTEND=false
     else
-        echo "${YELLOW}Warning: npm is not installed or not found${NC}"
+        printf "${YELLOW}Warning: npm is not installed or not found${NC}\n"
         echo "Frontend build will be skipped."
         SKIP_FRONTEND=true
     fi
@@ -113,9 +113,9 @@ else
 fi
 
 # Step 2: Install/Update PHP dependencies
-echo "${GREEN}[2/7] Installing PHP dependencies with Composer...${NC}"
+printf "${GREEN}[2/7] Installing PHP dependencies with Composer...${NC}\n"
 $COMPOSER_CMD install --no-dev --optimize-autoloader --no-interaction || {
-    echo "${RED}Error: Composer install failed!${NC}"
+    printf "${RED}Error: Composer install failed!${NC}\n"
     exit 1
 }
 echo ""
@@ -129,7 +129,7 @@ $PHP_CMD artisan migrate --force --no-interaction || {
 echo ""
 
 # Step 4: Clear and cache configuration
-echo "${GREEN}[4/7] Optimizing Laravel...${NC}"
+printf "${GREEN}[4/7] Optimizing Laravel...${NC}\n"
 $PHP_CMD artisan config:clear
 $PHP_CMD artisan cache:clear
 $PHP_CMD artisan route:clear
@@ -137,27 +137,27 @@ $PHP_CMD artisan view:clear
 
 # Cache configuration for production
 $PHP_CMD artisan config:cache || {
-    echo "${YELLOW}Warning: Config cache failed. Continuing...${NC}"
+    printf "${YELLOW}Warning: Config cache failed. Continuing...${NC}\n"
 }
 $PHP_CMD artisan route:cache || {
-    echo "${YELLOW}Warning: Route cache failed. Continuing...${NC}"
+    printf "${YELLOW}Warning: Route cache failed. Continuing...${NC}\n"
 }
 $PHP_CMD artisan view:cache || {
-    echo "${YELLOW}Warning: View cache failed. Continuing...${NC}"
+    printf "${YELLOW}Warning: View cache failed. Continuing...${NC}\n"
 }
 echo ""
 
 # Step 5: Build frontend assets
 if [ "$SKIP_FRONTEND" = false ]; then
-    echo "${GREEN}[5/7] Building frontend assets...${NC}"
+    printf "${GREEN}[5/7] Building frontend assets...${NC}\n"
     
     # Install npm dependencies if needed
     if [ ! -d "node_modules" ] || [ "package.json" -nt "node_modules" ]; then
         echo "Installing npm dependencies..."
         $NPM_CMD ci --legacy-peer-deps --no-audit || {
-            echo "${YELLOW}Warning: npm ci failed, trying npm install...${NC}"
+            printf "${YELLOW}Warning: npm ci failed, trying npm install...${NC}\n"
             $NPM_CMD install --legacy-peer-deps --no-audit || {
-                echo "${RED}Error: npm install failed!${NC}"
+                printf "${RED}Error: npm install failed!${NC}\n"
                 exit 1
             }
         }
@@ -165,32 +165,32 @@ if [ "$SKIP_FRONTEND" = false ]; then
     
     # Build production assets
     $NPM_CMD run build || {
-        echo "${RED}Error: Frontend build failed!${NC}"
+        printf "${RED}Error: Frontend build failed!${NC}\n"
         exit 1
     }
     echo ""
 else
-    echo "${YELLOW}[5/7] Skipping frontend build (npm not available)...${NC}"
+    printf "${YELLOW}[5/7] Skipping frontend build (npm not available)...${NC}\n"
     echo ""
 fi
 
 # Step 6: Ensure storage link exists
-echo "${GREEN}[6/7] Ensuring storage link...${NC}"
+printf "${GREEN}[6/7] Ensuring storage link...${NC}\n"
 $PHP_CMD artisan storage:link || {
-    echo "${YELLOW}Warning: Storage link already exists or failed. Continuing...${NC}"
+    printf "${YELLOW}Warning: Storage link already exists or failed. Continuing...${NC}\n"
 }
 echo ""
 
 # Step 7: Final optimizations
-echo "${GREEN}[7/7] Running final optimizations...${NC}"
+printf "${GREEN}[7/7] Running final optimizations...${NC}\n"
 $PHP_CMD artisan optimize || {
-    echo "${YELLOW}Warning: Optimize failed. Continuing...${NC}"
+    printf "${YELLOW}Warning: Optimize failed. Continuing...${NC}\n"
 }
 echo ""
 
 # Summary
 echo "========================================="
-echo "${GREEN}✓ Deployment completed successfully!${NC}"
+printf "${GREEN}✓ Deployment completed successfully!${NC}\n"
 echo "========================================="
 echo ""
 echo "Next steps:"
