@@ -182,19 +182,39 @@ echo ""
 
 # Step 4: Clear and cache configuration
 printf "${GREEN}[4/7] Optimizing Laravel...${NC}\n"
-$PHP_CMD artisan config:clear
-$PHP_CMD artisan cache:clear
-$PHP_CMD artisan route:clear
-$PHP_CMD artisan view:clear
+
+# Ensure cache directories exist and have correct permissions
+CACHE_DIRS="storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache"
+for dir in $CACHE_DIRS; do
+    if [ ! -d "$dir" ]; then
+        mkdir -p "$dir" 2>/dev/null || true
+    fi
+    # Make sure current user can write to cache directories
+    chmod -R u+w "$dir" 2>/dev/null || true
+done
+
+# Try to clear caches (may fail if permissions aren't perfect, that's ok)
+$PHP_CMD artisan config:clear 2>&1 || {
+    printf "${YELLOW}Warning: Config clear failed (may need permissions fix). Continuing...${NC}\n"
+}
+$PHP_CMD artisan cache:clear 2>&1 || {
+    printf "${YELLOW}Warning: Cache clear failed (may need permissions fix). Continuing...${NC}\n"
+}
+$PHP_CMD artisan route:clear 2>&1 || {
+    printf "${YELLOW}Warning: Route clear failed (may need permissions fix). Continuing...${NC}\n"
+}
+$PHP_CMD artisan view:clear 2>&1 || {
+    printf "${YELLOW}Warning: View clear failed (may need permissions fix). Continuing...${NC}\n"
+}
 
 # Cache configuration for production
-$PHP_CMD artisan config:cache || {
+$PHP_CMD artisan config:cache 2>&1 || {
     printf "${YELLOW}Warning: Config cache failed. Continuing...${NC}\n"
 }
-$PHP_CMD artisan route:cache || {
+$PHP_CMD artisan route:cache 2>&1 || {
     printf "${YELLOW}Warning: Route cache failed. Continuing...${NC}\n"
 }
-$PHP_CMD artisan view:cache || {
+$PHP_CMD artisan view:cache 2>&1 || {
     printf "${YELLOW}Warning: View cache failed. Continuing...${NC}\n"
 }
 echo ""
