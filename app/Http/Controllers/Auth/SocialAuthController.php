@@ -31,7 +31,11 @@ class SocialAuthController extends Controller
             $user = User::where('google_id', $googleUser->id)->first();
 
             if ($user) {
-                // User exists with Google account, log them in
+                // User exists with Google account, ensure email is verified
+                if (!$user->hasVerifiedEmail()) {
+                    $user->email_verified_at = now();
+                    $user->save();
+                }
                 Auth::login($user, true);
                 return redirect()->intended('/dashboard');
             }
@@ -46,7 +50,7 @@ class SocialAuthController extends Controller
                 $user->save();
                 
                 Auth::login($user, true);
-                return redirect()->intended('/dashboard');
+                return redirect()->route('dashboard');
             }
 
             // User doesn't exist, create new account
