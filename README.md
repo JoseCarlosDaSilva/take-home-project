@@ -79,13 +79,19 @@ npm run dev
 - ✅ `.env.sample` file created with all necessary configurations
 - ✅ Google OAuth configuration documentation created (`INSTRUCOES_GOOGLE_OAUTH.md`)
 
+### ✅ Phase 2: Complete Authentication System (COMPLETED)
+
+- ✅ Email verification enabled (User model implements MustVerifyEmail)
+- ✅ Google OAuth fully implemented with SocialAuthController
+- ✅ Google login buttons added to Login and Register pages
+- ✅ Automatic email verification for Google OAuth users
+- ✅ Account linking: existing email accounts can be linked with Google
+- ✅ Password recovery already included in Laravel Breeze
+- ✅ Migration created for google_id column in users table
+- ✅ Password field made nullable for Google OAuth users
+
 ### ⏳ Upcoming Phases
 
-- ⏳ Phase 2: Complete Authentication System
-  - Email verification implementation
-  - Google OAuth implementation
-  - Password recovery implementation
-  
 - ⏳ Phase 3: Label Creation Interface
   - Address forms (origin and destination)
   - Package attributes form
