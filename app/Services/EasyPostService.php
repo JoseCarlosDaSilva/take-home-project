@@ -2,17 +2,20 @@
 
 namespace App\Services;
 
-use EasyPost\EasyPost;
-use EasyPost\Address;
-use EasyPost\Parcel;
-use EasyPost\Shipment;
+use EasyPost\EasyPostClient;
 use Illuminate\Support\Facades\Log;
 
 class EasyPostService
 {
+    protected $client;
+
     public function __construct()
     {
-        EasyPost::setApiKey(env('EASYPOST_API_KEY'));
+        $apiKey = env('EASYPOST_API_KEY');
+        if (empty($apiKey)) {
+            throw new \Exception('EASYPOST_API_KEY is not configured in .env file');
+        }
+        $this->client = new EasyPostClient($apiKey);
     }
 
     /**
@@ -35,60 +38,54 @@ class EasyPostService
                 throw new \Exception('To address must be in the United States');
             }
 
-            // Create from address
-            $fromAddressObj = Address::create([
-                'name' => $fromAddress['name'],
-                'street1' => $fromAddress['street1'],
-                'street2' => $fromAddress['street2'] ?? null,
-                'city' => $fromAddress['city'],
-                'state' => $fromAddress['state'],
-                'zip' => $fromAddress['zip'],
-                'country' => 'US',
-                'phone' => $fromAddress['phone'] ?? null,
+            // Create shipment using the new EasyPost 8.4 API
+            $shipment = $this->client->shipment->create([
+                'from_address' => [
+                    'name' => $fromAddress['name'],
+                    'street1' => $fromAddress['street1'],
+                    'street2' => $fromAddress['street2'] ?? null,
+                    'city' => $fromAddress['city'],
+                    'state' => $fromAddress['state'],
+                    'zip' => $fromAddress['zip'],
+                    'country' => 'US',
+                    'phone' => $fromAddress['phone'] ?? null,
+                ],
+                'to_address' => [
+                    'name' => $toAddress['name'],
+                    'street1' => $toAddress['street1'],
+                    'street2' => $toAddress['street2'] ?? null,
+                    'city' => $toAddress['city'],
+                    'state' => $toAddress['state'],
+                    'zip' => $toAddress['zip'],
+                    'country' => 'US',
+                    'phone' => $toAddress['phone'] ?? null,
+                ],
+                'parcel' => [
+                    'length' => $parcelInfo['length'],
+                    'width' => $parcelInfo['width'],
+                    'height' => $parcelInfo['height'],
+                    'weight' => $parcelInfo['weight'],
+                ],
             ]);
 
-            // Create to address
-            $toAddressObj = Address::create([
-                'name' => $toAddress['name'],
-                'street1' => $toAddress['street1'],
-                'street2' => $toAddress['street2'] ?? null,
-                'city' => $toAddress['city'],
-                'state' => $toAddress['state'],
-                'zip' => $toAddress['zip'],
-                'country' => 'US',
-                'phone' => $toAddress['phone'] ?? null,
-            ]);
-
-            // Create parcel
-            $parcel = Parcel::create([
-                'length' => $parcelInfo['length'],
-                'width' => $parcelInfo['width'],
-                'height' => $parcelInfo['height'],
-                'weight' => $parcelInfo['weight'],
-            ]);
-
-            // Create shipment
-            $shipment = Shipment::create([
-                'from_address' => $fromAddressObj,
-                'to_address' => $toAddressObj,
-                'parcel' => $parcel,
-            ]);
+            // Get the lowest USPS rate
+            $lowestRate = $shipment->lowestRate(['carriers' => ['USPS']]);
 
             // Buy the shipment (purchase the label)
-            $shipment->buy([
-                'rate' => $shipment->lowest_rate(['carriers' => ['USPS']]),
-            ]);
+            $boughtShipment = $this->client->shipment->buy($shipment->id, $lowestRate);
 
             return [
-                'shipment_id' => $shipment->id,
-                'tracking_number' => $shipment->tracker->tracking_code ?? null,
-                'label_url' => $shipment->postage_label->label_url,
-                'carrier' => $shipment->selected_rate->carrier ?? 'USPS',
-                'service' => $shipment->selected_rate->service ?? null,
-                'rate' => $shipment->selected_rate->rate ?? null,
+                'shipment_id' => $boughtShipment->id,
+                'tracking_number' => $boughtShipment->tracker->tracking_code ?? null,
+                'label_url' => $boughtShipment->postage_label->label_url ?? null,
+                'carrier' => $boughtShipment->selected_rate->carrier ?? 'USPS',
+                'service' => $boughtShipment->selected_rate->service ?? null,
+                'rate' => $boughtShipment->selected_rate->rate ?? null,
             ];
         } catch (\Exception $e) {
-            Log::error('EasyPost API Error: ' . $e->getMessage());
+            Log::error('EasyPost API Error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
             throw new \Exception('Failed to create shipping label: ' . $e->getMessage());
         }
     }
