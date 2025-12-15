@@ -165,11 +165,26 @@ $COMPOSER_CMD install --no-dev --optimize-autoloader --no-interaction || {
     exit 1
 }
 
+# Verify EasyPost package is installed (critical dependency)
+if [ ! -d "vendor/easypost" ]; then
+    printf "${YELLOW}Warning: EasyPost package not found, attempting to install...${NC}\n"
+    $COMPOSER_CMD require easypost/easypost-php --no-dev --optimize-autoloader --no-interaction || {
+        printf "${RED}Error: Failed to install EasyPost package!${NC}\n"
+        exit 1
+    }
+fi
+
 # Ensure autoloader is up to date (important for packages like EasyPost)
 printf "Regenerating Composer autoloader...\n"
 $COMPOSER_CMD dump-autoload --optimize --no-interaction || {
     printf "${YELLOW}Warning: Autoloader regeneration failed, continuing...${NC}\n"
 }
+
+# Verify autoloader includes EasyPost
+if ! grep -q "EasyPost" vendor/composer/autoload_psr4.php 2>/dev/null && ! grep -q "easypost" vendor/composer/autoload_classmap.php 2>/dev/null; then
+    printf "${YELLOW}Warning: EasyPost not found in autoloader, forcing regeneration...${NC}\n"
+    $COMPOSER_CMD dump-autoload --no-interaction || true
+fi
 echo ""
 
 # Step 3: Run database migrations
