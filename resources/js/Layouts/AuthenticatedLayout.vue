@@ -39,6 +39,12 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Dashboard
                                 </NavLink>
+                                <NavLink
+                                    :href="route('shipping-labels.index')"
+                                    :active="route().current('shipping-labels.*')"
+                                >
+                                    Labels
+                                </NavLink>
                             </div>
                         </div>
 
@@ -145,6 +151,12 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('dashboard')"
                         >
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('shipping-labels.index')"
+                            :active="route().current('shipping-labels.*')"
+                        >
+                            Labels
                         </ResponsiveNavLink>
                     </div>
 
