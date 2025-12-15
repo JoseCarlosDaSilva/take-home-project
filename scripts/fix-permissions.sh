@@ -90,11 +90,13 @@ if [ -d "scripts" ]; then
     echo "  Set script files to 755"
 fi
 
-# Ensure .env is readable only by owner (600)
+# Ensure .env is readable by owner and group (640)
+# Owner: takehome (can read/write)
+# Group: www (PHP-FPM needs to read)
 if [ -f ".env" ]; then
-    chmod 600 .env
-    chown "$SITE_OWNER:$SITE_OWNER" .env
-    echo "  Set .env to 600 (owner read/write only)"
+    chmod 640 .env
+    chown "$SITE_OWNER:$APACHE_USER" .env
+    echo "  Set .env to 640 (owner read/write, group read) - owned by $SITE_OWNER:$APACHE_USER"
 fi
 
 # Set permissions for public directory
@@ -113,7 +115,7 @@ echo "  - Writable directories (storage, bootstrap/cache): $APACHE_USER:$SITE_OW
 echo "    - Directories: 775 (owner www and group takehome can write)"
 echo "    - Files: 664 (owner www and group takehome can write)"
 echo "  - Executable files (artisan, scripts): $SITE_OWNER:$SITE_OWNER (755)"
-echo "  - .env: $SITE_OWNER:$SITE_OWNER (600, secure)"
+echo "  - .env: $SITE_OWNER:$APACHE_USER (640, owner read/write, group read)"
 echo ""
 echo "The Apache user '$APACHE_USER' (owner) can now write to logs and cache directories."
 echo "The site owner '$SITE_OWNER' (group) also has write access to these directories."
