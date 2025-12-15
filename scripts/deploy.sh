@@ -325,13 +325,38 @@ echo ""
 # Step 7: Final optimizations
 printf "${GREEN}[7/7] Running final optimizations...${NC}\n"
 
+# Force clear ALL Laravel caches to ensure fresh autoloader is used
+printf "Clearing all Laravel caches...\n"
+$PHP_CMD artisan config:clear 2>/dev/null || true
+$PHP_CMD artisan cache:clear 2>/dev/null || true
+$PHP_CMD artisan route:clear 2>/dev/null || true
+$PHP_CMD artisan view:clear 2>/dev/null || true
+
+# Clear opcache if available (important for production)
+if php -m | grep -q opcache 2>/dev/null; then
+    $PHP_CMD artisan opcache:clear 2>/dev/null || true
+fi
+
 # Clear and rebuild autoloader cache
 # Suppress warnings about missing dev package directories (normal with --no-dev)
+printf "Rebuilding autoloader...\n"
 $COMPOSER_CMD dump-autoload --optimize --no-interaction 2>&1 | grep -v "Could not scan for classes inside" | grep -v "which does not appear to be a file nor a folder" || {
     printf "${YELLOW}Warning: Autoloader dump had some warnings (normal with --no-dev). Continuing...${NC}\n"
 }
 
-$PHP_CMD artisan optimize || {
+# Rebuild Laravel caches
+printf "Rebuilding Laravel caches...\n"
+$PHP_CMD artisan config:cache 2>&1 || {
+    printf "${YELLOW}Warning: Config cache failed. Continuing...${NC}\n"
+}
+$PHP_CMD artisan route:cache 2>&1 || {
+    printf "${YELLOW}Warning: Route cache failed. Continuing...${NC}\n"
+}
+$PHP_CMD artisan view:cache 2>&1 || {
+    printf "${YELLOW}Warning: View cache failed. Continuing...${NC}\n"
+}
+
+$PHP_CMD artisan optimize 2>&1 || {
     printf "${YELLOW}Warning: Optimize failed. Continuing...${NC}\n"
 }
 echo ""
