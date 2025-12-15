@@ -96,11 +96,17 @@ npm run dev
   - Address forms (origin and destination)
   - Package attributes form
   
-- ⏳ Phase 4: EasyPost API Integration
-  - EasyPost service class
-  - Label creation endpoints
-  - Data modeling
-  
+### ✅ Phase 4: EasyPost API Integration (COMPLETED)
+
+- ✅ EasyPost PHP SDK installed
+- ✅ EasyPostService created for API interactions
+- ✅ ShippingLabel model and migration created
+- ✅ ShippingLabelController with CRUD operations
+- ✅ Routes configured for shipping labels
+- ✅ User isolation (users can only view their own labels)
+- ✅ USPS-only validation (US addresses required)
+- ✅ Integration with EasyPost API for label generation
+
 - ⏳ Phase 5: Viewing and History
   - Label viewing
   - User-specific history
