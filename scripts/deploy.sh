@@ -182,10 +182,27 @@ fi
 
 # Step 2: Install/Update PHP dependencies
 printf "${GREEN}[2/7] Installing PHP dependencies with Composer...${NC}\n"
+
+# Restore composer.lock from git to ensure we use the committed version
+# This prevents composer.lock from being modified during deploy
+if git ls-files --error-unmatch composer.lock >/dev/null 2>&1; then
+    printf "Restoring composer.lock from repository...\n"
+    git checkout HEAD -- composer.lock 2>/dev/null || true
+fi
+
 $COMPOSER_CMD install --no-dev --optimize-autoloader --no-interaction || {
     printf "${RED}Error: Composer install failed!${NC}\n"
     exit 1
 }
+
+# Restore composer.lock again after install (in case composer modified it)
+# This ensures composer.lock stays in sync with the repository
+if git diff --quiet composer.lock 2>/dev/null; then
+    printf "composer.lock is unchanged.${NC}\n"
+else
+    printf "${YELLOW}composer.lock was modified by composer install. Restoring from repository...${NC}\n"
+    git checkout HEAD -- composer.lock 2>/dev/null || true
+fi
 
 # Verify EasyPost package is installed (critical dependency)
 if [ ! -d "vendor/easypost" ]; then
@@ -194,6 +211,8 @@ if [ ! -d "vendor/easypost" ]; then
         printf "${RED}Error: Failed to install EasyPost package!${NC}\n"
         exit 1
     }
+    # Restore composer.lock after require as well
+    git checkout HEAD -- composer.lock 2>/dev/null || true
 fi
 
 # Ensure autoloader is up to date (important for packages like EasyPost)
