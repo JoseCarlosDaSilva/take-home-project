@@ -22,7 +22,7 @@ cd "$SCRIPT_DIR" || exit 1
 echo "Working directory: $SCRIPT_DIR"
 echo ""
 
-# Set ownership for all project files to site owner
+# Set ownership for all project files to site owner (except writable dirs)
 echo "Setting ownership of all files to $SITE_OWNER..."
 chown -R "$SITE_OWNER:$SITE_OWNER" .
 
@@ -37,18 +37,20 @@ for dir in $STORAGE_DIRS; do
     fi
 done
 
-# Set ownership of storage and bootstrap/cache to site owner:apache group
+# Set ownership of storage and bootstrap/cache to apache user:site owner group
+# Owner: www (Apache can write)
+# Group: takehome (site owner can also access)
 echo ""
-echo "Setting ownership of storage and cache directories..."
-chown -R "$SITE_OWNER:$APACHE_USER" storage
-chown -R "$SITE_OWNER:$APACHE_USER" bootstrap/cache
+echo "Setting ownership of writable directories to $APACHE_USER:$SITE_OWNER..."
+chown -R "$APACHE_USER:$SITE_OWNER" storage
+chown -R "$APACHE_USER:$SITE_OWNER" bootstrap/cache
 
-# Set directory permissions (755 for directories)
+# Set directory permissions (755 for most directories)
 echo ""
 echo "Setting directory permissions (755)..."
 find . -type d -exec chmod 755 {} \;
 
-# Set file permissions (644 for files)
+# Set file permissions (644 for most files)
 echo "Setting file permissions (644)..."
 find . -type f -exec chmod 644 {} \;
 
@@ -56,24 +58,32 @@ find . -type f -exec chmod 644 {} \;
 echo ""
 echo "Setting special permissions for writable directories..."
 
-# Storage directories: 775 (rwxrwxr-x) - owner and group can write
+# Storage directories: 775 (rwxrwxr-x) - owner (www) and group (takehome) can write
 for dir in $STORAGE_DIRS; do
     if [ -d "$dir" ]; then
         chmod 775 "$dir"
-        echo "  Set $dir to 775"
+        # Set all files in these directories to 664 (rw-rw-r--)
+        find "$dir" -type f -exec chmod 664 {} \;
+        # Set all subdirectories to 775
+        find "$dir" -type d -exec chmod 775 {} \;
+        echo "  Set $dir to 775 (directories) and 664 (files)"
     fi
 done
 
 # Bootstrap cache: 775
 if [ -d "bootstrap/cache" ]; then
     chmod 775 bootstrap/cache
-    echo "  Set bootstrap/cache to 775"
+    find bootstrap/cache -type f -exec chmod 664 {} \;
+    find bootstrap/cache -type d -exec chmod 775 {} \;
+    echo "  Set bootstrap/cache to 775 (directories) and 664 (files)"
 fi
 
 # Make storage/app/public accessible
 if [ -d "storage/app/public" ]; then
     chmod 775 storage/app/public
-    echo "  Set storage/app/public to 775"
+    find storage/app/public -type f -exec chmod 664 {} \;
+    find storage/app/public -type d -exec chmod 775 {} \;
+    echo "  Set storage/app/public to 775 (directories) and 664 (files)"
 fi
 
 # Set permissions for artisan and scripts (executable)
@@ -111,10 +121,10 @@ echo ""
 echo "✓ Permissions setup complete!"
 echo ""
 echo "Summary:"
-echo "  - All files owned by: $SITE_OWNER"
-echo "  - Storage/cache directories: $SITE_OWNER:$APACHE_USER (775)"
+echo "  - Most files/directories owned by: $SITE_OWNER:$SITE_OWNER"
+echo "  - Writable directories (storage, bootstrap/cache): $APACHE_USER:$SITE_OWNER (775/664)"
 echo "  - Regular files: 644"
 echo "  - Regular directories: 755"
 echo "  - .env: 600 (secure)"
 echo ""
-echo "Note: Make sure PHP-FPM pool runs as user '$SITE_OWNER' or adjust accordingly."
+echo "The Apache user '$APACHE_USER' can now write to logs and cache directories."
