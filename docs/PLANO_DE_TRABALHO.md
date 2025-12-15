@@ -41,26 +41,26 @@
 
 ## Plano de Implementação (Dividido em Etapas)
 
-### Fase 1: Setup e Configuração Inicial (30-40 min)
+### ✅ Fase 1: Setup e Configuração Inicial (COMPLETED)
 
 #### 1.1 Instalação do Laravel
-- [ ] Criar projeto Laravel 12 (compatível com PHP 8.2.29)
-- [ ] Configurar banco de dados MySQL (.env)
-- [ ] Instalar dependências do backend
+- [x] Criar projeto Laravel 12 (compatível com PHP 8.2.29)
+- [x] Configurar banco de dados MySQL (.env.sample criado com todas as configurações)
+- [x] Instalar dependências do backend
 
 #### 1.2 Configuração do Frontend
-- [ ] Instalar Laravel Breeze com Vue.js (inclui autenticação básica)
-- [ ] Configurar Vite para Vue 3
-- [ ] Instalar bibliotecas UI (ex: TailwindCSS já vem com Breeze)
+- [x] Instalar Laravel Breeze com Vue.js (inclui autenticação básica)
+- [x] Configurar Vite para Vue 3
+- [x] Instalar bibliotecas UI (ex: TailwindCSS já vem com Breeze)
 
 #### 1.3 Configuração de Autenticação
-- [ ] Instalar Laravel Socialite para OAuth Google
-- [ ] Configurar Laravel Fortify ou usar Breeze + Socialite
-- [ ] Configurar credenciais Google OAuth no .env
+- [x] Instalar Laravel Socialite para OAuth Google
+- [x] Configurar Laravel Breeze + Socialite
+- [x] Configurar credenciais Google OAuth no .env.sample (com instruções em docs/INSTRUCOES_GOOGLE_OAUTH.md)
 
 #### 1.4 Configuração de Email
-- [ ] Configurar driver de email (Mailtrap para desenvolvimento)
-- [ ] Criar templates de email para verificação e reset de senha
+- [x] Configurar driver de email (Mailtrap para desenvolvimento no .env.sample)
+- [x] Templates de email para verificação e reset de senha (incluídos no Laravel Breeze)
 
 **Decisão**: Usar Laravel Breeze com Vue.js porque:
 - Fornece autenticação completa pronta
@@ -70,71 +70,70 @@
 
 ---
 
-### Fase 2: Sistema de Autenticação Completo (60-75 min)
+### ✅ Fase 2: Sistema de Autenticação Completo (COMPLETED)
 
 #### 2.1 Autenticação Email/Senha
-- [ ] Implementar registro de usuário
-- [ ] Implementar login
-- [ ] Validação de formulários (frontend e backend)
-- [ ] Mensagens de erro/sucesso
+- [x] Implementar registro de usuário (Laravel Breeze)
+- [x] Implementar login (Laravel Breeze)
+- [x] Validação de formulários (frontend e backend)
+- [x] Mensagens de erro/sucesso
 
 #### 2.2 Verificação de Email
-- [ ] Envio de email de verificação após registro
-- [ ] Endpoint para verificar email
-- [ ] Middleware para bloquear usuários não verificados
-- [ ] **Exceção**: Usuários OAuth Google são automaticamente verificados
+- [x] Envio de email de verificação após registro (User model implements MustVerifyEmail)
+- [x] Endpoint para verificar email (incluído no Breeze)
+- [x] Middleware para bloquear usuários não verificados (middleware 'verified')
+- [x] **Exceção**: Usuários OAuth Google são automaticamente verificados
 
 #### 2.3 OAuth Google
-- [ ] Configurar rotas OAuth (redirect e callback)
-- [ ] Implementar lógica de autenticação Google
-- [ ] Criar/atualizar usuário ao fazer login com Google
-- [ ] Marcar usuários Google como verificados automaticamente
-- [ ] Tratar casos de email já cadastrado
+- [x] Configurar rotas OAuth (redirect e callback em routes/auth.php)
+- [x] Implementar lógica de autenticação Google (SocialAuthController)
+- [x] Criar/atualizar usuário ao fazer login com Google
+- [x] Marcar usuários Google como verificados automaticamente
+- [x] Tratar casos de email já cadastrado (account linking)
 
 #### 2.4 Recuperação de Senha
-- [ ] Página "Esqueci minha senha"
-- [ ] Envio de email com token de reset
-- [ ] Página de redefinição de senha
-- [ ] Validação e atualização de senha
+- [x] Página "Esqueci minha senha" (incluída no Breeze)
+- [x] Envio de email com token de reset (Laravel Breeze)
+- [x] Página de redefinição de senha (incluída no Breeze)
+- [x] Validação e atualização de senha
 
-**Decisão**: Usar Fortify como base (mais flexível que Breeze puro) OU usar Breeze + customizações.
-Verificar qual é mais rápido de configurar.
+**Decisão**: Laravel Breeze + Socialite foi usado (mais rápido e adequado para o projeto).
 
 ---
 
-### Fase 3: Interface de Criação de Etiquetas (60-75 min)
+### ✅ Fase 3: Interface de Criação de Etiquetas (COMPLETED)
 
 #### 3.1 Formulário de Endereços
-- [ ] Componente Vue para endereço de origem
-- [ ] Componente Vue para endereço de destino
-- [ ] Validação de endereços (apenas EUA)
-- [ ] Validação de campos obrigatórios
-- [ ] Design responsivo e moderno
+- [x] Componente Vue para endereço de origem (Create.vue)
+- [x] Componente Vue para endereço de destino (Create.vue)
+- [x] Validação de endereços (apenas EUA - dropdown de estados)
+- [x] Validação de campos obrigatórios (frontend e backend)
+- [x] Design responsivo e moderno (TailwindCSS)
 
 #### 3.2 Formulário de Atributos do Pacote
-- [ ] Campos: peso (lbs), comprimento, largura, altura (inches)
-- [ ] Validação numérica
-- [ ] Design consistente com formulário de endereços
+- [x] Campos: peso (lbs), comprimento, largura, altura (inches)
+- [x] Validação numérica
+- [x] Design consistente com formulário de endereços
 
 #### 3.3 Layout da Página Principal
-- [ ] Header com navegação (logout, histórico)
-- [ ] Dashboard após login
-- [ ] Formulário completo de criação de etiqueta
-- [ ] Feedback visual (loading, sucesso, erro)
+- [x] Header com navegação (logout, histórico em AuthenticatedLayout.vue)
+- [x] Dashboard após login (Dashboard.vue com quick access cards)
+- [x] Formulário completo de criação de etiqueta (Create.vue)
+- [x] Feedback visual (loading, sucesso, erro)
 
 ---
 
-### Fase 4: Integração com EasyPost API (45-60 min)
+### ✅ Fase 4: Integração com EasyPost API (COMPLETED)
 
 #### 4.1 Configuração EasyPost
-- [ ] Instalar SDK EasyPost PHP (composer)
-- [ ] Configurar API key no .env
-- [ ] Criar service class para EasyPost
+- [x] Instalar SDK EasyPost PHP (composer require easypost/easypost-php)
+- [x] Configurar API key no .env.sample
+- [x] Criar service class para EasyPost (EasyPostService.php)
 
 #### 4.2 Backend - Endpoint de Criação de Etiqueta
-- [ ] Controller para receber dados do frontend
-- [ ] Validação de dados (endereços EUA, atributos)
-- [ ] Integração com EasyPost API:
+- [x] Controller para receber dados do frontend (ShippingLabelController)
+- [x] Validação de dados (endereços EUA, atributos)
+- [x] Integração com EasyPost API:
   - Criar Address (origem e destino)
   - Criar Parcel (dimensões e peso)
   - Criar Shipment
@@ -142,31 +141,31 @@ Verificar qual é mais rápido de configurar.
   - Obter URL da etiqueta e dados
 
 #### 4.3 Modelagem de Dados
-- [ ] Migration: tabela `shipping_labels`
+- [x] Migration: tabela `shipping_labels` (2025_12_15_184621_create_shipping_labels_table.php)
   - id, user_id, from_address (JSON), to_address (JSON)
   - parcel_info (JSON), easypost_shipment_id
-  - label_url, tracking_number, created_at, updated_at
-- [ ] Model: ShippingLabel com relacionamento User
-- [ ] Scopes para isolar por usuário
+  - label_url, tracking_number, carrier, service, rate, created_at, updated_at
+- [x] Model: ShippingLabel com relacionamento User
+- [x] Isolamento por usuário via middleware 'auth' e query scopes
 
 #### 4.4 Armazenamento e Resposta
-- [ ] Salvar etiqueta no banco de dados
-- [ ] Retornar dados da etiqueta para frontend (incluindo URL da imagem)
+- [x] Salvar etiqueta no banco de dados
+- [x] Retornar dados da etiqueta para frontend (incluindo URL da imagem via Inertia.js)
 
 ---
 
-### Fase 5: Visualização e Histórico (45-60 min)
+### ✅ Fase 5: Visualização e Histórico (COMPLETED)
 
 #### 5.1 Visualização da Etiqueta
-- [ ] Componente Vue para exibir etiqueta (imagem)
-- [ ] Botão de impressão (window.print())
-- [ ] Layout responsivo da visualização
+- [x] Componente Vue para exibir etiqueta (Show.vue com imagem)
+- [x] Botão de impressão (window.print())
+- [x] Layout responsivo da visualização
 
 #### 5.2 Histórico de Etiquetas
-- [ ] Endpoint API: listar etiquetas do usuário autenticado
-- [ ] Página Vue com lista de etiquetas
-- [ ] Filtros/paginação (se houver tempo)
-- [ ] Design de cards/listagem moderna
+- [x] Endpoint: listar etiquetas do usuário autenticado (ShippingLabelController@index)
+- [x] Página Vue com lista de etiquetas (Index.vue)
+- [x] Paginação implementada (Laravel pagination)
+- [x] Design de cards/listagem moderna (TailwindCSS)
 
 ---
 
