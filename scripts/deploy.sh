@@ -103,9 +103,21 @@ echo ""
 # Step 1: Git pull (if in a git repository)
 if [ -d ".git" ]; then
     printf "${GREEN}[1/7] Pulling latest changes from repository...${NC}\n"
-    git pull origin main || {
-        printf "${YELLOW}Warning: git pull failed. Continuing with current code...${NC}\n"
-    }
+    
+    # Set git config to use current user's config, not root's
+    export GIT_CONFIG_GLOBAL=/dev/null
+    export GIT_CONFIG_SYSTEM=/dev/null
+    
+    # Try to pull, but continue if it fails (may not have SSH keys or remote access)
+    if git pull origin main 2>&1; then
+        printf "${GREEN}Successfully pulled latest changes.${NC}\n"
+    else
+        printf "${YELLOW}Warning: git pull failed. This is normal if:${NC}\n"
+        printf "${YELLOW}  - SSH keys are not configured for this user${NC}\n"
+        printf "${YELLOW}  - Repository uses SSH and user doesn't have access${NC}\n"
+        printf "${YELLOW}Continuing with current code...${NC}\n"
+        printf "${YELLOW}To fix: Configure SSH keys or use HTTPS remote URL${NC}\n"
+    fi
     echo ""
 else
     printf "${YELLOW}[1/7] Not a git repository, skipping git pull...${NC}\n"
