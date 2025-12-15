@@ -147,11 +147,61 @@ const printLabel = () => {
 
 <style>
 @media print {
+    /* Hide navigation, header, and other non-essential elements */
+    header,
+    nav,
     .print\:hidden {
-        display: none;
+        display: none !important;
     }
+    
     .print\:block {
-        display: block;
+        display: block !important;
+    }
+    
+    /* Reset body and container styles for printing */
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Remove padding and margins from main container */
+    .py-12,
+    .max-w-7xl,
+    .sm\:px-6,
+    .lg\:px-8,
+    .p-6 {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* Make the label container fill the page */
+    .overflow-hidden,
+    .shadow-sm,
+    .sm\:rounded-lg {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        overflow: visible !important;
+    }
+    
+    /* Center the label image on the page */
+    .mb-6 {
+        margin-bottom: 0 !important;
+    }
+    
+    /* Ensure label image is properly sized for printing */
+    img {
+        max-width: 100% !important;
+        height: auto !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+    }
+    
+    /* Only show the label image when printing */
+    .flex.justify-center.print\:block {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        min-height: 100vh !important;
     }
 }
 </style>
