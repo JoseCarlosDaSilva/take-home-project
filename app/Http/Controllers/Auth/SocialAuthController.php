@@ -37,7 +37,7 @@ class SocialAuthController extends Controller
                     $user->save();
                 }
                 Auth::login($user, true);
-                return redirect()->intended('/dashboard');
+                return redirect()->route('dashboard');
             }
 
             // Check if user exists by email (for accounts created with email/password)
@@ -64,7 +64,7 @@ class SocialAuthController extends Controller
 
             Auth::login($user, true);
 
-            return redirect()->intended('/dashboard');
+            return redirect()->route('dashboard');
         } catch (\Exception $e) {
             \Log::error('Google OAuth error: ' . $e->getMessage());
             return redirect('/login')->with('error', 'Unable to login with Google. Please try again.');
