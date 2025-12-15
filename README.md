@@ -1,121 +1,121 @@
 # USPS Label Generator
 
-Sistema de geração e armazenamento de etiquetas de envio USPS usando a API EasyPost.
+Web application for generating and storing USPS shipping labels using the EasyPost API.
 
-## Sobre o Projeto
+## About the Project
 
-Aplicação web desenvolvida para permitir que usuários gerem, visualizem e armazenem etiquetas de envio USPS. O sistema utiliza autenticação via email/senha ou OAuth Google, com verificação de email obrigatória para contas não-Google.
+Web application developed to enable users to generate, view, and store USPS shipping labels. The system uses authentication via email/password or OAuth Google, with mandatory email verification for non-Google accounts.
 
-## Stack Tecnológico
+## Tech Stack
 
 - **Backend**: Laravel 12.x (PHP 8.2+)
 - **Frontend**: Vue.js 3 + Inertia.js + TailwindCSS
 - **Database**: MySQL 8.0+
-- **Autenticação**: Laravel Breeze + Laravel Socialite (OAuth Google)
-- **API Externa**: EasyPost (geração de etiquetas)
+- **Authentication**: Laravel Breeze + Laravel Socialite (OAuth Google)
+- **External API**: EasyPost (label generation)
 
-## Requisitos
+## Requirements
 
 - PHP >= 8.2
 - Composer
 - Node.js >= 18.x
 - MySQL >= 8.0
-- NPM ou Yarn
+- NPM or Yarn
 
-## Instalação
+## Installation
 
-1. Clone o repositório:
+1. Clone the repository:
 ```bash
 git clone <repository-url>
 cd take-home-project
 ```
 
-2. Instale as dependências do PHP:
+2. Install PHP dependencies:
 ```bash
 composer install
 ```
 
-3. Instale as dependências do Node:
+3. Install Node dependencies:
 ```bash
 npm install --legacy-peer-deps
 ```
 
-4. Configure o ambiente:
+4. Configure the environment:
 ```bash
 cp .env.sample .env
 php artisan key:generate
 ```
 
-5. Configure o arquivo `.env` com suas credenciais:
-   - Conexão MySQL remota
-   - Credenciais OAuth Google (veja `INSTRUCOES_GOOGLE_OAUTH.md`)
-   - API Key EasyPost
-   - Configurações de email
+5. Configure the `.env` file with your credentials:
+   - Remote MySQL connection
+   - Google OAuth credentials (see `INSTRUCOES_GOOGLE_OAUTH.md`)
+   - EasyPost API Key
+   - Email settings
 
-6. Execute as migrações:
+6. Run migrations:
 ```bash
 php artisan migrate
 ```
 
-7. Compile os assets:
+7. Build assets:
 ```bash
 npm run build
 ```
 
-8. Inicie o servidor de desenvolvimento:
+8. Start the development server:
 ```bash
 php artisan serve
 npm run dev
 ```
 
-## Progresso de Desenvolvimento
+## Development Progress
 
-### ✅ Fase 1: Setup e Configuração Inicial (CONCLUÍDA)
+### ✅ Phase 1: Initial Setup and Configuration (COMPLETED)
 
-- ✅ Laravel 12 instalado e configurado
-- ✅ Laravel Breeze com Vue.js instalado (Inertia.js)
-- ✅ Laravel Socialite instalado para OAuth Google
-- ✅ Dependências npm instaladas
-- ✅ Arquivo `.env.sample` criado com todas as configurações necessárias
-- ✅ Documentação de configuração OAuth Google criada (`INSTRUCOES_GOOGLE_OAUTH.md`)
+- ✅ Laravel 12 installed and configured
+- ✅ Laravel Breeze with Vue.js installed (Inertia.js)
+- ✅ Laravel Socialite installed for Google OAuth
+- ✅ NPM dependencies installed
+- ✅ `.env.sample` file created with all necessary configurations
+- ✅ Google OAuth configuration documentation created (`INSTRUCOES_GOOGLE_OAUTH.md`)
 
-### ⏳ Próximas Fases
+### ⏳ Upcoming Phases
 
-- ⏳ Fase 2: Sistema de Autenticação Completo
-  - Implementar verificação de email
-  - Implementar OAuth Google
-  - Implementar recuperação de senha
+- ⏳ Phase 2: Complete Authentication System
+  - Email verification implementation
+  - Google OAuth implementation
+  - Password recovery implementation
   
-- ⏳ Fase 3: Interface de Criação de Etiquetas
-  - Formulários de endereços (origem e destino)
-  - Formulário de atributos do pacote
+- ⏳ Phase 3: Label Creation Interface
+  - Address forms (origin and destination)
+  - Package attributes form
   
-- ⏳ Fase 4: Integração EasyPost API
-  - Service class para EasyPost
-  - Endpoints de criação de etiquetas
-  - Modelagem de dados
+- ⏳ Phase 4: EasyPost API Integration
+  - EasyPost service class
+  - Label creation endpoints
+  - Data modeling
   
-- ⏳ Fase 5: Visualização e Histórico
-  - Visualização de etiquetas
-  - Histórico por usuário
+- ⏳ Phase 5: Viewing and History
+  - Label viewing
+  - User-specific history
 
-## Configuração
+## Configuration
 
-### Credenciais Google OAuth
+### Google OAuth Credentials
 
-Consulte o arquivo `INSTRUCOES_GOOGLE_OAUTH.md` para instruções detalhadas sobre como obter as credenciais OAuth do Google.
+See the `INSTRUCOES_GOOGLE_OAUTH.md` file for detailed instructions on how to obtain Google OAuth credentials.
 
-### API EasyPost
+### EasyPost API
 
-1. Acesse https://www.easypost.com/
-2. Crie uma conta (ou use as credenciais fornecidas)
-3. Obtenha sua API Key (use a chave de teste durante desenvolvimento)
-4. Adicione no `.env`:
+1. Visit https://www.easypost.com/
+2. Create an account (or use provided credentials)
+3. Get your API Key (use test key during development)
+4. Add to `.env`:
    ```
-   EASYPOST_API_KEY=sua_chave_aqui
+   EASYPOST_API_KEY=your_key_here
    ```
 
-## Estrutura do Projeto
+## Project Structure
 
 ```
 take-home-project/
@@ -133,6 +133,6 @@ take-home-project/
 └── tests/
 ```
 
-## Licença
+## License
 
-Este projeto é open-source e está disponível sob a licença MIT.
+This project is open-source and available under the BSD-2-Clause license.
