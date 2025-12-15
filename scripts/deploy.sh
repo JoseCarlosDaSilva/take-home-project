@@ -102,13 +102,13 @@ echo ""
 
 # Step 1: Git pull (if in a git repository)
 if [ -d ".git" ]; then
-    echo "${GREEN}[1/7] Pulling latest changes from repository...${NC}"
+    printf "${GREEN}[1/7] Pulling latest changes from repository...${NC}\n"
     git pull origin main || {
-        echo "${YELLOW}Warning: git pull failed. Continuing with current code...${NC}"
+        printf "${YELLOW}Warning: git pull failed. Continuing with current code...${NC}\n"
     }
     echo ""
 else
-    echo "${YELLOW}[1/7] Not a git repository, skipping git pull...${NC}"
+    printf "${YELLOW}[1/7] Not a git repository, skipping git pull...${NC}\n"
     echo ""
 fi
 
@@ -121,9 +121,9 @@ $COMPOSER_CMD install --no-dev --optimize-autoloader --no-interaction || {
 echo ""
 
 # Step 3: Run database migrations
-echo "${GREEN}[3/7] Running database migrations...${NC}"
+printf "${GREEN}[3/7] Running database migrations...${NC}\n"
 $PHP_CMD artisan migrate --force --no-interaction || {
-    echo "${RED}Error: Database migrations failed!${NC}"
+    printf "${RED}Error: Database migrations failed!${NC}\n"
     exit 1
 }
 echo ""
@@ -161,6 +161,15 @@ if [ "$SKIP_FRONTEND" = false ]; then
                 exit 1
             }
         }
+        # Fix permissions for node_modules/.bin executables after install
+        if [ -d "node_modules/.bin" ]; then
+            chmod -R u+x node_modules/.bin/* 2>/dev/null || true
+        fi
+    fi
+    
+    # Ensure node_modules/.bin executables have correct permissions before build
+    if [ -d "node_modules/.bin" ]; then
+        chmod -R u+x node_modules/.bin/* 2>/dev/null || true
     fi
     
     # Build production assets

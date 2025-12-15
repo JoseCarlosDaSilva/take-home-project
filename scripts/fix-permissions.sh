@@ -90,6 +90,12 @@ if [ -d "scripts" ]; then
     echo "  Set script files to 755"
 fi
 
+# Fix permissions for node_modules/.bin executables (needed for vite, npm scripts, etc.)
+if [ -d "node_modules/.bin" ]; then
+    find node_modules/.bin -type f -exec chmod 755 {} \;
+    echo "  Set node_modules/.bin executables to 755"
+fi
+
 # Ensure .env is readable by owner and group (640)
 # Owner: takehome (can read/write)
 # Group: www (PHP-FPM needs to read)
