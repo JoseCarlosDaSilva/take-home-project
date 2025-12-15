@@ -120,6 +120,45 @@ npm run dev
 - ✅ Navigation links in authenticated layout
 - ✅ Dashboard updated with quick access cards
 
+## Production Deployment
+
+### Deployment Scripts
+
+The project includes two deployment scripts for production:
+
+1. **`scripts/deploy.sh`** - Handles the full deployment process:
+   - Pulls latest code from repository (`git pull`)
+   - Installs PHP dependencies (`composer install --no-dev`)
+   - Runs database migrations
+   - Clears and caches Laravel configuration
+   - Builds frontend assets (`npm ci` and `npm run build`)
+   - Creates storage link
+   - Runs Laravel optimizations
+
+2. **`scripts/fix-permissions.sh`** - Sets correct file permissions:
+   - Sets ownership to `www:takehome` (Apache user:group)
+   - Sets proper permissions for Laravel writable directories
+   - Ensures `.env` has correct read permissions for PHP-FPM
+
+### Deployment Order
+
+**Important**: Run scripts in the correct order:
+
+```bash
+# 1. First, run the deployment script (includes git pull)
+./scripts/deploy.sh
+
+# 2. Then, fix permissions for all files/directories
+./scripts/fix-permissions.sh
+```
+
+**Why this order?**
+- The `deploy.sh` script creates new files (`vendor/`, `node_modules/`, cache files, etc.)
+- Running `fix-permissions.sh` AFTER ensures all newly created files have correct permissions
+- The `deploy.sh` already includes `git pull` as the first step, so no need to run it separately
+
+**Note**: Both scripts should be run from the project root directory by the site owner user (`takehome` on FreeBSD).
+
 ## Configuration
 
 ### Google OAuth Credentials
