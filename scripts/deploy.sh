@@ -142,15 +142,37 @@ if [ -d ".git" ]; then
         export GIT_SSH_COMMAND="ssh -F $CURRENT_HOME/.ssh/config 2>/dev/null || ssh"
     fi
     
+    # Check for uncommitted changes (like composer.lock) and stash them temporarily
+    if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+        printf "${YELLOW}Uncommitted changes detected, stashing temporarily...${NC}\n"
+        git stash push -m "Deploy script auto-stash $(date +%Y-%m-%d_%H:%M:%S)" 2>/dev/null || {
+            printf "${YELLOW}Warning: Could not stash changes, continuing anyway...${NC}\n"
+        }
+        STASHED=true
+    else
+        STASHED=false
+    fi
+    
     # Try to pull, but continue if it fails (may not have SSH keys or remote access)
     if git pull origin main 2>&1; then
         printf "${GREEN}Successfully pulled latest changes.${NC}\n"
+        # Restore stashed changes if we stashed something
+        if [ "$STASHED" = true ]; then
+            printf "${YELLOW}Restoring previously stashed changes...${NC}\n"
+            git stash pop 2>/dev/null || {
+                printf "${YELLOW}Warning: Could not restore stashed changes.${NC}\n"
+            }
+        fi
     else
         printf "${YELLOW}Warning: git pull failed. This is normal if:${NC}\n"
         printf "${YELLOW}  - SSH keys are not configured for user $CURRENT_USER${NC}\n"
         printf "${YELLOW}  - Repository uses SSH and user doesn't have access${NC}\n"
         printf "${YELLOW}  - Check: $CURRENT_HOME/.ssh/config and deploy keys${NC}\n"
         printf "${YELLOW}Continuing with current code...${NC}\n"
+        # Restore stashed changes even if pull failed
+        if [ "$STASHED" = true ]; then
+            git stash pop 2>/dev/null || true
+        fi
     fi
     echo ""
 else
