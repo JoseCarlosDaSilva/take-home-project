@@ -37,8 +37,12 @@ const form = useForm({
 
 const submit = () => {
     form.post(route('shipping-labels.store'), {
-        onError: () => {
-            // Errors are handled by Inertia
+        onSuccess: () => {
+            // Redirect will be handled by Inertia automatically
+        },
+        onError: (errors) => {
+            // Errors are automatically displayed by InputError components
+            console.error('Form submission errors:', errors);
         },
     });
 };
@@ -66,12 +70,13 @@ const usStates = [
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
                     <div class="p-6 text-gray-900 dark:text-gray-100">
+                        <!-- General error message -->
                         <div
-                            v-if="errorMessage"
+                            v-if="form.errors.error || Object.keys(form.errors).length > 0 && !form.processing"
                             class="mb-6 rounded-md bg-red-50 p-4 dark:bg-red-900/20"
                         >
                             <p class="text-sm font-medium text-red-800 dark:text-red-200">
-                                {{ errorMessage }}
+                                {{ form.errors.error || 'Please correct the errors below and try again.' }}
                             </p>
                         </div>
 
