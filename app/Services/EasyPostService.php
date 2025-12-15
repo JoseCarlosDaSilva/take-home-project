@@ -69,8 +69,26 @@ class EasyPostService
                 ],
             ]);
 
-            // Get the lowest USPS rate
-            $lowestRate = $shipment->lowestRate(['carriers' => ['USPS']]);
+            // Check if shipment has rates
+            if (empty($shipment->rates) || count($shipment->rates) === 0) {
+                throw new \Exception('No shipping rates available for this shipment. Please check addresses and parcel dimensions.');
+            }
+
+            // Filter for USPS rates only
+            $uspsRates = array_filter($shipment->rates, function($rate) {
+                return strtoupper($rate->carrier ?? '') === 'USPS';
+            });
+
+            if (empty($uspsRates)) {
+                throw new \Exception('No USPS rates available for this shipment. Please check addresses and parcel dimensions.');
+            }
+
+            // Get the lowest USPS rate (syntax: lowestRate(['USPS']))
+            $lowestRate = $shipment->lowestRate(['USPS']);
+
+            if (!$lowestRate) {
+                throw new \Exception('Could not determine the lowest USPS rate. Please try again.');
+            }
 
             // Buy the shipment (purchase the label)
             $boughtShipment = $this->client->shipment->buy($shipment->id, $lowestRate);
