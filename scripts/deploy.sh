@@ -404,3 +404,4 @@ echo "  1. Run the permissions script if needed: ./scripts/fix-permissions.sh"
 echo "  2. Test the application"
 echo "  3. Check logs: tail -f storage/logs/laravel.log"
 echo ""
+

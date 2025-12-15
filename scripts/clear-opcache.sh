@@ -36,3 +36,4 @@ fi
 
 printf "\n=== Verification ===\n"
 php -r "require 'vendor/autoload.php'; echo 'EasyPostClient exists: ' . (class_exists('EasyPost\\EasyPostClient') ? 'YES' : 'NO') . '\n'; echo 'EasyPost (old) exists: ' . (class_exists('EasyPost\\EasyPost') ? 'YES (PROBLEM!)' : 'NO (correct)') . '\n';"
+

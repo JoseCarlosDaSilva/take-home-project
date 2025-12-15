@@ -132,3 +132,4 @@ echo "  - .env: $SITE_OWNER:$APACHE_USER (640, owner read/write, group read)"
 echo ""
 echo "The Apache user '$APACHE_USER' (owner) can now write to logs and cache directories."
 echo "The site owner '$SITE_OWNER' (group) also has write access to these directories."
+
