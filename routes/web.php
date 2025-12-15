@@ -24,4 +24,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('shipping-labels', \App\Http\Controllers\ShippingLabelController::class);
+});
+
 require __DIR__.'/auth.php';

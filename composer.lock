@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3792c384a4843a326dcbf2070c357b06",
+    "content-hash": "c433af859f7a85b20db7130198c8e1d1",
     "packages": [
         {
             "name": "brick/math",
@@ -440,6 +440,65 @@
                 }
             ],
             "time": "2025-10-31T18:51:33+00:00"
+        },
+        {
+            "name": "easypost/easypost-php",
+            "version": "8.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/EasyPost/easypost-php.git",
+                "reference": "af4ed338cf2305375f090c6b168034167706281d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/EasyPost/easypost-php/zipball/af4ed338cf2305375f090c6b168034167706281d",
+                "reference": "af4ed338cf2305375f090c6b168034167706281d",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "guzzlehttp/guzzle": "^7.9",
+                "php": ">=8.1"
+            },
+            "require-dev": {
+                "allejo/php-vcr-sanitizer": "^1.1",
+                "php-coveralls/php-coveralls": "^2.7",
+                "php-vcr/php-vcr": "^1.8",
+                "phpstan/phpstan": "^2.1",
+                "phpunit/phpunit": "^10",
+                "roave/security-advisories": "dev-latest",
+                "rregeer/phpunit-coverage-check": "^0.3.1",
+                "squizlabs/php_codesniffer": "^3.11"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "EasyPost\\": "lib/EasyPost/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "EasyPost Developers",
+                    "email": "oss@easypost.com",
+                    "homepage": "https://www.easypost.com"
+                }
+            ],
+            "description": "EasyPost Shipping API Client Library for PHP",
+            "homepage": "https://github.com/EasyPost/easypost-php",
+            "keywords": [
+                "api",
+                "easypost",
+                "shipping"
+            ],
+            "support": {
+                "issues": "https://github.com/EasyPost/easypost-php/issues",
+                "source": "https://github.com/EasyPost/easypost-php/tree/v8.4.0"
+            },
+            "time": "2025-11-24T21:10:36+00:00"
         },
         {
             "name": "egulias/email-validator",

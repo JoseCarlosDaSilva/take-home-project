@@ -46,4 +46,12 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the shipping labels for the user.
+     */
+    public function shippingLabels()
+    {
+        return $this->hasMany(ShippingLabel::class);
+    }
 }
