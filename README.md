@@ -48,7 +48,7 @@ php artisan key:generate
 
 5. Configure the `.env` file with your credentials:
    - Remote MySQL connection
-   - Google OAuth credentials (see `docs/INSTRUCOES_GOOGLE_OAUTH.md`)
+   - Google OAuth credentials (see `INSTRUCOES_GOOGLE_OAUTH.md`)
    - EasyPost API Key
    - Email settings
 
@@ -115,7 +115,7 @@ npm run dev
 
 ### Google OAuth Credentials
 
-See the `INSTRUCOES_GOOGLE_OAUTH.md` file for detailed instructions on how to obtain Google OAuth credentials.
+See the `docs/INSTRUCOES_GOOGLE_OAUTH.md` file for detailed instructions on how to obtain Google OAuth credentials.
 
 ### EasyPost API
 
