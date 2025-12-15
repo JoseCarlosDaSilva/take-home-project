@@ -90,15 +90,12 @@ npm run dev
 - ✅ Migration created for google_id column in users table
 - ✅ Password field made nullable for Google OAuth users
 
-### ✅ Phase 3: Label Creation Interface (COMPLETED)
+### ⏳ Upcoming Phases
 
-- ✅ Create shipping label form with address inputs
-- ✅ From and To address forms with US state dropdown
-- ✅ Package attributes form (dimensions and weight)
-- ✅ Form validation (frontend and backend)
-- ✅ Responsive design with modern UI
-- ✅ Integration with ShippingLabelController
-
+- ⏳ Phase 3: Label Creation Interface
+  - Address forms (origin and destination)
+  - Package attributes form
+  
 ### ✅ Phase 4: EasyPost API Integration (COMPLETED)
 
 - ✅ EasyPost PHP SDK installed
@@ -110,9 +107,15 @@ npm run dev
 - ✅ USPS-only validation (US addresses required)
 - ✅ Integration with EasyPost API for label generation
 
-- ⏳ Phase 5: Viewing and History
-  - Label viewing
-  - User-specific history
+### ✅ Phase 5: Viewing and History (COMPLETED)
+
+- ✅ Shipping label viewing page with print functionality
+- ✅ Label history/index page with pagination
+- ✅ User-specific label list (automatic isolation)
+- ✅ Label details display (addresses, package info, tracking)
+- ✅ Print button for label printing
+- ✅ Navigation links in authenticated layout
+- ✅ Dashboard updated with quick access cards
 
 ## Configuration
 
