@@ -25,6 +25,17 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$SCRIPT_DIR" || exit 1
 
+# Ensure we use the current user's home directory for SSH/Git config
+# This is important when using setuidgid or similar tools
+CURRENT_USER=$(whoami)
+CURRENT_HOME=$(eval echo ~$CURRENT_USER)
+
+# Set HOME explicitly to avoid using root's home
+export HOME="$CURRENT_HOME"
+
+# Force git to use the current user's SSH config
+export GIT_SSH_COMMAND="ssh -i $CURRENT_HOME/.ssh/github_takehome_project -F $CURRENT_HOME/.ssh/config"
+
 echo "========================================="
 echo "Laravel Deployment Script"
 echo "========================================="
@@ -104,19 +115,32 @@ echo ""
 if [ -d ".git" ]; then
     printf "${GREEN}[1/7] Pulling latest changes from repository...${NC}\n"
     
-    # Set git config to use current user's config, not root's
-    export GIT_CONFIG_GLOBAL=/dev/null
+    # Configure git to use current user's settings (important for setuidgid)
+    export GIT_CONFIG_GLOBAL="$CURRENT_HOME/.gitconfig"
     export GIT_CONFIG_SYSTEM=/dev/null
+    
+    # Configure SSH to use current user's SSH config and keys
+    # Try to use SSH config if it exists, otherwise use the deploy key directly
+    if [ -f "$CURRENT_HOME/.ssh/config" ] && grep -q "github.com-takehome" "$CURRENT_HOME/.ssh/config" 2>/dev/null; then
+        # Use SSH config (recommended approach with deploy key)
+        export GIT_SSH_COMMAND="ssh -F $CURRENT_HOME/.ssh/config"
+    elif [ -f "$CURRENT_HOME/.ssh/github_takehome_project" ]; then
+        # Fallback: use deploy key directly
+        export GIT_SSH_COMMAND="ssh -i $CURRENT_HOME/.ssh/github_takehome_project -o IdentitiesOnly=yes"
+    else
+        # No specific SSH config, use default but force current user's home
+        export GIT_SSH_COMMAND="ssh -F $CURRENT_HOME/.ssh/config 2>/dev/null || ssh"
+    fi
     
     # Try to pull, but continue if it fails (may not have SSH keys or remote access)
     if git pull origin main 2>&1; then
         printf "${GREEN}Successfully pulled latest changes.${NC}\n"
     else
         printf "${YELLOW}Warning: git pull failed. This is normal if:${NC}\n"
-        printf "${YELLOW}  - SSH keys are not configured for this user${NC}\n"
+        printf "${YELLOW}  - SSH keys are not configured for user $CURRENT_USER${NC}\n"
         printf "${YELLOW}  - Repository uses SSH and user doesn't have access${NC}\n"
+        printf "${YELLOW}  - Check: $CURRENT_HOME/.ssh/config and deploy keys${NC}\n"
         printf "${YELLOW}Continuing with current code...${NC}\n"
-        printf "${YELLOW}To fix: Configure SSH keys or use HTTPS remote URL${NC}\n"
     fi
     echo ""
 else
